@@ -2,173 +2,172 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Definição de um nó para uma estrutura árvore + heap (vulgo treap)
-struct NoTreap
+// Definição de nó para estrutura árvore + heap, conhecida como Treap
+struct NodoTreap
 {
-  int valor;            // Valor armazenado no nó
-  int prioridade;       // Prioridade do nó
-  struct NoTreap *esq;  // Ponteiro para o nó à esquerda
-  struct NoTreap *dir;  // Ponteiro para o nó à direita
+    int chave;             // Valor do nó
+    int prioridade;        // Prioridade do nó
+    struct NodoTreap *esquerda; // Ponteiro para o nó à esquerda
+    struct NodoTreap *direita;  // Ponteiro para o nó à direita
 };
 
-typedef struct NoTreap NoTreap;
-NoTreap *criarArvore(int valor);
-NoTreap *rotacaoEsquerda(NoTreap *raiz);
-NoTreap *rotacaoDireita(NoTreap *raiz);
-NoTreap *inserirNo(NoTreap *raiz, int valor);
-NoTreap *removerNo(NoTreap *raiz, int valor);
-void imprimirArvore(NoTreap *raiz, int nivel);
+typedef struct NodoTreap NodoTreap;
+NodoTreap *inicializarTreap(int chave);
+NodoTreap *girarEsquerda(NodoTreap *raiz);
+NodoTreap *girarDireita(NodoTreap *raiz);
+NodoTreap *adicionarNodo(NodoTreap *raiz, int chave);
+NodoTreap *removerNodo(NodoTreap *raiz, int chave);
+void exibirTreap(NodoTreap *raiz, int profundidade);
 
 int main(void)
 {
-  NoTreap *raiz = criarArvore(10);
-  raiz = inserirNo(raiz, 5);
-  raiz = inserirNo(raiz, 6);
-  raiz = inserirNo(raiz, 15);
-  raiz = inserirNo(raiz, 13);
+    NodoTreap *raiz = inicializarTreap(10);
+    raiz = adicionarNodo(raiz, 5);
+    raiz = adicionarNodo(raiz, 6);
+    raiz = adicionarNodo(raiz, 15);
+    raiz = adicionarNodo(raiz, 13);
 
-  printf("Árvore Treap:\n");
-  imprimirArvore(raiz, 0);
+    printf("Estrutura Treap:\n");
+    exibirTreap(raiz, 0);
 
-  raiz = removerNo(raiz, 5);
-  printf("\nÁrvore Treap após remoção:\n");
-  imprimirArvore(raiz, 0);
+    raiz = removerNodo(raiz, 5);
+    printf("\nEstrutura Treap após remoção:\n");
+    exibirTreap(raiz, 0);
 
-  return 0;
+    return 0;
 }
 
-// Função para inicializar uma árvore Treap
-NoTreap *criarArvore(int valor)
+// Função para criar uma Treap com um valor inicial
+NodoTreap *inicializarTreap(int chave)
 {
-  NoTreap *novoNo = (NoTreap *)malloc(sizeof(NoTreap));
-  if (novoNo == NULL) {
-    printf("Erro ao alocar memória.\n");
-    exit(EXIT_FAILURE);
-  }
+    NodoTreap *novoNodo = (NodoTreap *)malloc(sizeof(NodoTreap));
+    if (novoNodo == NULL)
+    {
+        printf("Erro de alocação de memória.\n");
+        exit(EXIT_FAILURE);
+    }
 
-  novoNo->valor = valor;
-  novoNo->prioridade = rand() % 100;
-  novoNo->esq = NULL;
-  novoNo->dir = NULL;
-  return novoNo;
+    novoNodo->chave = chave;
+    novoNodo->prioridade = rand() % 100;
+    novoNodo->esquerda = NULL;
+    novoNodo->direita = NULL;
+    return novoNodo;
 }
 
-// Função para realizar uma rotação à esquerda em uma estrutura treap
-NoTreap *rotacaoEsquerda(NoTreap *raiz)
+// Função para fazer uma rotação à esquerda em uma Treap
+NodoTreap *girarEsquerda(NodoTreap *raiz)
 {
-  NoTreap *novaRaiz = raiz->dir;
-  raiz->dir = novaRaiz->esq;
-  novaRaiz->esq = raiz;
-  return novaRaiz;
+    NodoTreap *novaRaiz = raiz->direita;
+    raiz->direita = novaRaiz->esquerda;
+    novaRaiz->esquerda = raiz;
+    return novaRaiz;
 }
 
-// Função para realizar uma rotação à direita em uma estrutura treap
-NoTreap *rotacaoDireita(NoTreap *raiz)
+// Função para fazer uma rotação à direita em uma Treap
+NodoTreap *girarDireita(NodoTreap *raiz)
 {
-  NoTreap *novaRaiz = raiz->esq;
-  raiz->esq = novaRaiz->dir;
-  novaRaiz->dir = raiz;
-  return novaRaiz;
+    NodoTreap *novaRaiz = raiz->esquerda;
+    raiz->esquerda = novaRaiz->direita;
+    novaRaiz->direita = raiz;
+    return novaRaiz;
 }
 
-// Função para inserir um valor na árvore
-NoTreap *inserirNo(NoTreap *raiz, int valor)
+// Função para adicionar um valor na Treap
+NodoTreap *adicionarNodo(NodoTreap *raiz, int chave)
 {
-  if (raiz == NULL)
-    return criarArvore(valor);
+    if (raiz == NULL)
+        return inicializarTreap(chave);
 
-  if (valor < raiz->valor)
-  {
-    raiz->esq = inserirNo(raiz->esq, valor);
+    if (chave < raiz->chave)
+    {
+        raiz->esquerda = adicionarNodo(raiz->esquerda, chave);
 
-    // É necessário para manter a árvore balanceada
-    // Realiza rotação à direita se a prioridade do nó à esquerda for maior
-    if (raiz->esq->prioridade > raiz->prioridade)
-      raiz = rotacaoDireita(raiz);
-  }
-  else if (valor > raiz->valor)
-  {
-    raiz->dir = inserirNo(raiz->dir, valor);
+        // Manter a Treap balanceada
+        if (raiz->esquerda->prioridade > raiz->prioridade)
+            raiz = girarDireita(raiz);
+    }
+    else if (chave > raiz->chave)
+    {
+        raiz->direita = adicionarNodo(raiz->direita, chave);
 
-    if (raiz->dir->prioridade > raiz->prioridade)
-      raiz = rotacaoEsquerda(raiz);
-  }
+        if (raiz->direita->prioridade > raiz->prioridade)
+            raiz = girarEsquerda(raiz);
+    }
 
-  return raiz;
-}
-
-// Função para remover um valor da árvore
-NoTreap *removerNo(NoTreap *raiz, int valor)
-{
-  if (raiz == NULL)
     return raiz;
+}
 
-  // Realiza a busca pelo valor na árvore
-  if (valor < raiz->valor)
-    raiz->esq = removerNo(raiz->esq, valor);
+// Função para remover um valor da Treap
+NodoTreap *removerNodo(NodoTreap *raiz, int chave)
+{
+    if (raiz == NULL)
+        return raiz;
 
-  else if (valor > raiz->valor)
-    raiz->dir = removerNo(raiz->dir, valor);
+    // Buscando o valor na Treap
+    if (chave < raiz->chave)
+        raiz->esquerda = removerNodo(raiz->esquerda, chave);
 
-  // Se o valor foi encontrado, começa o processo de remoção
-  else
-  {
-    // Caso 1: Nó possui nenhum filho
-    if (raiz->esq == NULL && raiz->dir == NULL)
-    {
-      free(raiz); // Libera a memória do nó removido
-      return NULL;
-    }
-    // Caso 2: Nó possui apenas um filho à direita
-    else if (raiz->esq == NULL)
-    {
-      NoTreap *temp = raiz->dir; // Promove o filho da direita
-      free(raiz);
-      return temp;
-    }
-    // Caso 3: Nó possui apenas um filho à esquerda
-    else if (raiz->dir == NULL)
-    {
-      NoTreap *temp = raiz->esq; // Promove o filho da esquerda
-      free(raiz);
-      return temp;
-    }
-    // Caso 4: Nó possui dois filhos
+    else if (chave > raiz->chave)
+        raiz->direita = removerNodo(raiz->direita, chave);
+
+    // Se a chave foi encontrada, proceder com a remoção
     else
     {
-      // Procura então o sucessor
-      // O sucessor será o filho com maior prioridade
-      if (raiz->esq->prioridade > raiz->dir->prioridade)
-      {
-        raiz = rotacaoDireita(raiz); // Rotaciona a árvore para promover o filho com maior prioridade
-        raiz->dir = removerNo(raiz->dir, valor); // Agora remove o valor da árvore
-      }
-      else
-      {
-        raiz = rotacaoEsquerda(raiz);
-        raiz->esq = removerNo(raiz->esq, valor);
-      }
+        // Caso 1: Nó sem filhos
+        if (raiz->esquerda == NULL && raiz->direita == NULL)
+        {
+            free(raiz);
+            return NULL;
+        }
+        // Caso 2: Somente filho à direita
+        else if (raiz->esquerda == NULL)
+        {
+            NodoTreap *temp = raiz->direita;
+            free(raiz);
+            return temp;
+        }
+        // Caso 3: Somente filho à esquerda
+        else if (raiz->direita == NULL)
+        {
+            NodoTreap *temp = raiz->esquerda;
+            free(raiz);
+            return temp;
+        }
+        // Caso 4: Dois filhos
+        else
+        {
+            // Escolhendo o sucessor baseado na prioridade
+            if (raiz->esquerda->prioridade > raiz->direita->prioridade)
+            {
+                raiz = girarDireita(raiz);
+                raiz->direita = removerNodo(raiz->direita, chave);
+            }
+            else
+            {
+                raiz = girarEsquerda(raiz);
+                raiz->esquerda = removerNodo(raiz->esquerda, chave);
+            }
+        }
     }
-  }
 
-  return raiz;
+    return raiz;
 }
 
-// Função criada pelo ChatGPT para imprimir a árvore Treap
-void imprimirArvore(NoTreap *raiz, int nivel)
+// Função para exibir a Treap de maneira hierárquica
+void exibirTreap(NodoTreap *raiz, int profundidade)
 {
-  if (raiz == NULL)
-    return;
+    if (raiz == NULL)
+        return;
 
-  // Imprime o filho direito
-  imprimirArvore(raiz->dir, nivel + 1);
+    // Exibindo o filho à direita
+    exibirTreap(raiz->direita, profundidade + 1);
 
-  // Imprime o nó atual com recuo de acordo com o nível
-  for (int i = 0; i < nivel; i++)
-    printf("\t");
+    // Exibindo o nó atual com recuo baseado na profundidade
+    for (int i = 0; i < profundidade; i++)
+        printf("\t");
 
-  printf("(%d, %d)\n", raiz->valor, raiz->prioridade);
+    printf("(%d, %d)\n", raiz->chave, raiz->prioridade);
 
-  // Imprime o filho esquerdo
-  imprimirArvore(raiz->esq, nivel + 1);
+    // Exibindo o filho à esquerda
+    exibirTreap(raiz->esquerda, profundidade + 1);
 }
